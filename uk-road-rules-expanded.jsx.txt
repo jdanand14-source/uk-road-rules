@@ -1,0 +1,855 @@
+import React, { useState } from 'react';
+import { ChevronDown, Menu, X, AlertTriangle, Zap, Gauge, AlertCircle, ParkingCircle, Navigation } from 'lucide-react';
+
+const UKRoadSignsWebsite = () => {
+  const [activeSection, setActiveSection] = useState('home');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [expandedItems, setExpandedItems] = useState({});
+
+  const toggleExpanded = (id) => {
+    setExpandedItems(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const navigationItems = [
+    { id: 'home', label: 'Home', icon: '🏠' },
+    { id: 'warnings', label: 'Warning Signs', icon: '⚠️' },
+    { id: 'mandatory', label: 'Mandatory Signs', icon: '🔵' },
+    { id: 'contraflow', label: 'Contraflow', icon: '🚧' },
+    { id: 'speedlimits', label: 'Speed Limits', icon: '🚗' },
+    { id: 'overtaking', label: 'Overtaking Rules', icon: '🏁' },
+    { id: 'parking', label: 'Parking Rules', icon: '🅿️' },
+    { id: 'roadstudmark', label: 'Road Studs & Marks', icon: '💎' },
+    { id: 'emergency', label: 'Emergency Procedures', icon: '🚨' },
+    { id: 'towing', label: 'Towing Guide', icon: '🚙' },
+  ];
+
+  const warningSignsData = [
+    { name: 'Pedestrians', desc: 'Pedestrians crossing area ahead', action: 'Slow down and watch for pedestrians' },
+    { name: 'Children', desc: 'School or play area nearby', action: 'Reduce speed significantly' },
+    { name: 'Cyclist', desc: 'Cycle route or cyclists expected', action: 'Give extra space and care to cyclists' },
+    { name: 'Slippery Road', desc: 'Road may be slippery', action: 'Reduce speed and exercise caution' },
+    { name: 'Steep Hill', desc: 'Steep downhill or uphill', action: 'Check brakes, use lower gear' },
+    { name: 'Work in Progress', desc: 'Road works ahead', action: 'Reduce speed, follow signs' },
+  ];
+
+  const speedLimitsData = [
+    { vehicle: 'Cars & Motorcycles', builtup: '30 mph', single: '60 mph', dual: '70 mph', motorway: '70 mph' },
+    { vehicle: 'Buses & Coaches', builtup: '30 mph', single: '50 mph', dual: '60 mph', motorway: '70 mph' },
+    { vehicle: 'HGV >7.5 tonnes', builtup: '30 mph', single: '40 mph', dual: '50 mph', motorway: '60 mph' },
+    { vehicle: 'Car Towing', builtup: '30 mph', single: '50 mph', dual: '60 mph', motorway: '60 mph' },
+  ];
+
+  const overtakingRules = [
+    {
+      location: 'Motorway 3+ lanes',
+      allowed: '✅ Yes',
+      rules: 'Pass on right only. Return to left lane after. Safe distance required. Do not block lanes.',
+      tips: 'Check mirrors, signal, move smoothly. Never undertake (pass on left).'
+    },
+    {
+      location: 'Motorway 2 lanes',
+      allowed: '⚠️ Caution',
+      rules: 'Only overtake when necessary. Must be confident you can complete safely.',
+      tips: 'Check for queuing traffic ahead. Plan overtakes carefully.'
+    },
+    {
+      location: 'Dual Carriageway',
+      allowed: '✅ Yes',
+      rules: 'Pass on right only. Check mirrors and blind spots. Signal clearly.',
+      tips: 'Never cross white line if solid. Return to left lane immediately after.'
+    },
+    {
+      location: 'Single Carriageway',
+      allowed: '⚠️ Restricted',
+      rules: 'Only when double lines allow (between sections). Never cross solid white lines.',
+      tips: 'Need clear visibility of 400+ meters ahead. Risky - avoid if possible.'
+    },
+    {
+      location: 'Urban/Town',
+      allowed: '❌ No',
+      rules: 'Absolutely forbidden in built-up areas. Follow traffic flow.',
+      tips: 'Illegal and dangerous. Stay in lane. Wait for clear traffic.'
+    },
+    {
+      location: 'Bus Lanes',
+      allowed: '⚠️ Conditional',
+      rules: 'Cannot overtake within bus lanes during operation hours.',
+      tips: 'Check restrictions. Usually 07:00-19:00. Some allow turning.'
+    },
+  ];
+
+  const parkingRules = [
+    {
+      location: 'Motorway',
+      night: '❌ PROHIBITED',
+      rules: 'Absolutely forbidden to park on motorway. Except emergency.',
+      details: 'Turn off engine if broken down. Use hard shoulder only in emergency. Use hazard lights. Call 999/breakdown service. Stay in vehicle or behind barrier.',
+      night_special: 'Extra dangerous at night due to high speed traffic. Never park.'
+    },
+    {
+      location: 'Urban/Town (30 mph)',
+      night: '✅ ALLOWED',
+      rules: 'Park in designated spaces. Follow markings and signs.',
+      details: 'Meters: Pay by day/hour. Permit zones: Need resident permit. Double yellow: Restricted. Stay within lines. No overnight truck parking.',
+      night_special: 'Can park at night ONLY if: Marked spaces OR permit zone. Lights must be off. Park near street lights for safety.'
+    },
+    {
+      location: 'Suburban Roads',
+      night: '⚠️ CAUTION',
+      rules: 'Must use marked bays. Avoid blocking driveways or kerbs.',
+      details: 'Stay 10m from junctions. Do not park on pavement (unless marked). No parking on yellow lines. Keep safe distance from other cars.',
+      night_special: 'Check for street lighting. Avoid isolated areas. Lock vehicle. Leave valuables out of sight.'
+    },
+    {
+      location: 'Double Yellow Lines',
+      night: '❌ NO',
+      rules: 'No waiting at any time (except loading).',
+      details: 'Applies 24/7. No parking even at night. Fine: £65-130.',
+      night_special: 'Same restriction day and night. Cannot park overnight.'
+    },
+    {
+      location: 'Single Yellow Line',
+      night: '✅ ALLOWED',
+      rules: 'Restricted during hours shown. Allowed outside these hours.',
+      details: 'Check sign for times. Typically 09:00-17:30 weekdays. Usually OK after hours and all day Sunday.',
+      night_special: 'Can often park at night and early morning. Check signs for specific times.'
+    },
+    {
+      location: 'Blue Badge Spaces',
+      night: '✅ Disabled Only',
+      rules: 'Disabled permit holders only. Must display badge.',
+      details: 'Free parking in most areas. 3-hour limit in some places. No enforcement at night in most cases.',
+      night_special: 'Usually no time limit at night. Badge must be valid and visible.'
+    },
+    {
+      location: 'Loading Bays',
+      night: '⚠️ Restricted',
+      rules: 'Can load/unload during hours shown. No parking.',
+      details: 'Must be actively loading/unloading. Check time restrictions. Commercial vehicles only.',
+      night_special: 'Usually no restriction at night. Check local signs.'
+    },
+    {
+      location: 'Resident Parking',
+      night: '✅ Permit Holders',
+      rules: 'Only with valid permit. Overnight allowed.',
+      details: 'Visitor permits available short-term. Non-permit cars get fined.',
+      night_special: 'Primary purpose is overnight parking. Permits control residential areas.'
+    },
+  ];
+
+  const roadStudsData = [
+    {
+      color: '🟦 White (Clear)',
+      location: 'Between lanes on motorways/dual carriageways',
+      purpose: 'Mark lane divisions',
+      meaning: 'Separates traffic flowing in same direction'
+    },
+    {
+      color: '🟥 Red',
+      location: 'Left edge of motorways',
+      purpose: 'Mark left edge/hard shoulder boundary',
+      meaning: 'Do not cross - emergency use only'
+    },
+    {
+      color: '🟨 Amber/Yellow',
+      location: 'Center line on dual carriageways',
+      purpose: 'Mark center dividing line',
+      meaning: 'Separates opposing traffic flows'
+    },
+    {
+      color: '🟩 Green',
+      location: 'Used infrequently',
+      purpose: 'Cycle path edges or reserved lanes',
+      meaning: 'Mark special use lanes'
+    },
+    {
+      color: '⚫ Black/Dark',
+      location: 'Occasional on minor roads',
+      purpose: 'Emergency/backup studs',
+      meaning: 'Reflective alternative when others fail'
+    },
+  ];
+
+  const roadMarkingsColor = [
+    {
+      color: '🟡 Yellow',
+      location: 'Parking restrictions',
+      meaning: 'No waiting restrictions apply',
+      examples: 'Single yellow line (timed), double yellow line (all times)',
+      times: 'Check signs for specific times'
+    },
+    {
+      color: '⚪ White',
+      location: 'Lane markings & edges',
+      meaning: 'Separates traffic lanes',
+      examples: 'Center lines, lane dividers, edge lines',
+      times: 'Solid = cannot cross, dashed = can cross when safe'
+    },
+    {
+      color: '🔵 Blue',
+      location: 'Disabled parking spaces',
+      meaning: 'Blue badge permit holders only',
+      examples: 'Square outline with wheelchair symbol',
+      times: 'Usually enforced 24/7'
+    },
+    {
+      color: '🔴 Red',
+      location: 'Bus/cycle lanes',
+      meaning: 'Restricted lane for specific use',
+      examples: 'Red tarmac indicating bus lane',
+      times: 'Check hours - usually 07:00-19:00'
+    },
+    {
+      color: '🟢 Green',
+      location: 'Cycle lanes & paths',
+      meaning: 'Reserved for cyclists',
+      examples: 'Green tarmac or outlined lane',
+      times: 'Solid green = no entry for other traffic'
+    },
+    {
+      color: '⚫ Black/White Chevrons',
+      location: 'Hatched areas',
+      meaning: 'Do not enter or park here',
+      examples: 'Diagonal lines, junction protection',
+      times: 'Always enforced'
+    },
+  ];
+
+  const contraflowRules = [
+    {
+      rule: 'Stay in Your Lane',
+      detail: 'Never change lanes unless absolutely necessary. Maintain position.',
+      danger: '⚠️ Other traffic is feet away in opposite direction'
+    },
+    {
+      rule: 'No Crossing Center Line',
+      detail: 'Physical barriers or solid markings separate you from oncoming traffic.',
+      danger: '⚠️ Head-on collision risk = fatal'
+    },
+    {
+      rule: 'Reduce Speed',
+      detail: 'Drive well below normal limits. Posted speed limit usually 40-50 mph max.',
+      danger: '⚠️ Less reaction time in narrow space'
+    },
+    {
+      rule: 'Maximum Concentration',
+      detail: 'No distractions. Watch for lane changes by other vehicles. Stay alert.',
+      danger: '⚠️ Other drivers may be tired or distracted'
+    },
+    {
+      rule: 'No Undertaking',
+      detail: 'Never pass on the left, even if traffic is slow.',
+      danger: '⚠️ Can trap you into oncoming traffic'
+    },
+    {
+      rule: 'Watch for Works Equipment',
+      detail: 'Temporary barriers, signs, lane dividers can appear suddenly.',
+      danger: '⚠️ Hitting barriers at speed is dangerous'
+    },
+    {
+      rule: 'Increase Following Distance',
+      detail: 'Use 3-second rule minimum. More in wet conditions.',
+      danger: '⚠️ Sudden stops can cause pile-ups'
+    },
+    {
+      rule: 'Use Dipped Headlights',
+      detail: 'Makes your vehicle more visible to oncoming traffic.',
+      danger: '⚠️ Especially important at dusk and night'
+    },
+  ];
+
+  const emergencyRules = [
+    {
+      situation: 'Breakdown on Motorway',
+      steps: [
+        '1. Hazard lights ON immediately',
+        '2. Try to reach hard shoulder (left side)',
+        '3. Stop as far left as possible',
+        '4. Exit vehicle - go behind barrier/hard shoulder',
+        '5. Call 999 or breakdown service',
+        '6. Wait behind barrier - do NOT stay in car',
+        '7. Do NOT stand between car and traffic'
+      ],
+      critical: '🚨 CRITICAL: Never stand in traffic lane or work near fast traffic'
+    },
+    {
+      situation: 'Breakdown on Busy A-Road',
+      steps: [
+        '1. Turn on hazard lights',
+        '2. Warn approaching traffic - position hazard triangles',
+        '3. Move car to side if safe (away from traffic)',
+        '4. Get passengers out and away from road',
+        '5. Call 999 or breakdown service',
+        '6. Stay off the road if traffic is heavy',
+        '7. Call police if blocking traffic completely'
+      ],
+      critical: '🚨 CRITICAL: Do not stand in traffic lane. Use reflective warning triangles.'
+    },
+    {
+      situation: 'Incident/Collision on Road',
+      steps: [
+        '1. Hazard lights ON',
+        '2. Move vehicles to side if safe and possible',
+        '3. Call 999 if anyone injured or blocking traffic',
+        '4. Turn off engines (fire risk)',
+        '5. Set warning triangles 45m behind vehicles',
+        '6. Collect witness details and photos',
+        '7. Exchange insurance details',
+        '8. Report to police within 24 hours'
+      ],
+      critical: '🚨 CRITICAL: Do not move vehicles from accident scene if injury - let police advise'
+    },
+    {
+      situation: 'Motorway Multiple Pile-Up',
+      steps: [
+        '1. Avoid the crash area - change lanes if safe',
+        '2. Slow down drastically',
+        '3. Turn hazard lights ON',
+        '4. Leave 10+ car spaces between you and crash',
+        '5. Let emergency vehicles pass - move to hard shoulder',
+        '6. Do NOT stop to help unless trained',
+        '7. Call 999 with location and description',
+        '8. Stay in vehicle with seatbelt on'
+      ],
+      critical: '🚨 CRITICAL: Do not block emergency vehicles. Stay in vehicle for safety.'
+    },
+    {
+      situation: 'Lost Brakes Going Downhill',
+      steps: [
+        '1. Use engine braking - drop to lower gear',
+        '2. Do NOT use brakes continuously (overheating)',
+        '3. Look for escape roads (uphill, gravel areas)',
+        '4. If on motorway - use left lane to slow',
+        '5. Steer toward hard shoulder or side',
+        '6. Do NOT swerve into other traffic',
+        '7. Once stopped - hazard lights ON, call 999'
+      ],
+      critical: '🚨 CRITICAL: Escape roads save lives. Look for them on steep descents.'
+    },
+    {
+      situation: 'Tire Blowout/Burst',
+      steps: [
+        '1. Do NOT brake hard - car will swerve',
+        '2. Hold wheel firm, ease off accelerator',
+        '3. Gradually slow down',
+        '4. Move to side/hard shoulder when safe',
+        '5. Turn hazard lights ON',
+        '6. Set warning triangles',
+        '7. Change tire or call breakdown service',
+        '8. Do NOT change tire on motorway - call for help'
+      ],
+      critical: '🚨 CRITICAL: Never change tires on motorway. Stay in vehicle, call for help.'
+    },
+    {
+      situation: 'Fire in Vehicle',
+      steps: [
+        '1. Pull over immediately - hazard lights ON',
+        '2. Turn off engine',
+        '3. Evacuate all passengers to safe distance',
+        '4. Call 999 - inform of fire',
+        '5. Do NOT attempt to fight fire yourself',
+        '6. If possible, close windows and doors',
+        '7. Stand well away from vehicle',
+        '8. Warn other traffic using gestures'
+      ],
+      critical: '🚨 CRITICAL: Evacuate immediately. Do not fight car fires - let firefighters handle it.'
+    },
+    {
+      situation: 'Loss of Control/Skid',
+      steps: [
+        '1. Remain calm - do not panic brake',
+        '2. If skidding: steer into the direction of the skid',
+        '3. Ease off accelerator and brake gently',
+        '4. If spinning - straighten wheels, accelerate gently',
+        '5. Once control regained - check mirrors',
+        '6. Move to side if needed',
+        '7. Assess vehicle damage',
+        '8. Continue carefully or call breakdown service'
+      ],
+      critical: '🚨 CRITICAL: Steer INTO skid, not away from it. Stay calm and smooth.'
+    },
+  ];
+
+  const renderHome = () => (
+    <div className="space-y-8">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-12 rounded-lg">
+        <h1 className="text-4xl font-bold mb-4">UK Road Rules Guide</h1>
+        <p className="text-lg text-blue-100">Complete reference including parking, overtaking, road studs, and emergency procedures</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-purple-50 border-l-4 border-purple-500 p-6 rounded">
+          <h3 className="text-xl font-bold text-purple-700 mb-2">🏁 Overtaking Rules</h3>
+          <p className="text-gray-700">Safe overtaking procedures for different road types with regulations</p>
+        </div>
+
+        <div className="bg-blue-50 border-l-4 border-blue-500 p-6 rounded">
+          <h3 className="text-xl font-bold text-blue-700 mb-2">🅿️ Parking Guide</h3>
+          <p className="text-gray-700">Day and night parking rules for all road types and markings</p>
+        </div>
+
+        <div className="bg-green-50 border-l-4 border-green-500 p-6 rounded">
+          <h3 className="text-xl font-bold text-green-700 mb-2">💎 Road Studs & Marks</h3>
+          <p className="text-gray-700">Color-coded studs and road markings explained</p>
+        </div>
+
+        <div className="bg-red-50 border-l-4 border-red-500 p-6 rounded">
+          <h3 className="text-xl font-bold text-red-700 mb-2">🚨 Emergency Procedures</h3>
+          <p className="text-gray-700">What to do in breakdowns, accidents, and critical situations</p>
+        </div>
+
+        <div className="bg-orange-50 border-l-4 border-orange-500 p-6 rounded">
+          <h3 className="text-xl font-bold text-orange-700 mb-2">🚧 Contraflow Safety</h3>
+          <p className="text-gray-700">Rules for driving through roadworks with reversed traffic</p>
+        </div>
+
+        <div className="bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded">
+          <h3 className="text-xl font-bold text-yellow-700 mb-2">⚡ Speed Limits</h3>
+          <p className="text-gray-700">Complete speed reference for all vehicles and roads</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderOvertaking = () => (
+    <div className="space-y-4">
+      <h2 className="text-3xl font-bold text-blue-900 mb-6">🏁 Overtaking Rules</h2>
+      <p className="text-gray-600 mb-6">Safe overtaking procedures vary by road type. Always prioritize safety over speed.</p>
+      
+      <div className="space-y-4">
+        {overtakingRules.map((rule, idx) => (
+          <div key={idx} className="bg-white border-l-4 border-purple-500 rounded-lg overflow-hidden shadow">
+            <button
+              onClick={() => toggleExpanded(`overtake-${idx}`)}
+              className="w-full p-4 bg-purple-50 hover:bg-purple-100 flex items-center justify-between"
+            >
+              <div className="text-left">
+                <h3 className="font-bold text-purple-700">{rule.location}</h3>
+                <p className="text-sm text-purple-600 mt-1">{rule.allowed}</p>
+              </div>
+              <ChevronDown 
+                size={20} 
+                className={`text-purple-600 transition-transform ${expandedItems[`overtake-${idx}`] ? 'rotate-180' : ''}`}
+              />
+            </button>
+            {expandedItems[`overtake-${idx}`] && (
+              <div className="p-4 bg-white space-y-3">
+                <div>
+                  <p className="text-gray-700"><strong>Rules:</strong> {rule.rules}</p>
+                </div>
+                <div>
+                  <p className="text-gray-700"><strong>Tips:</strong> {rule.tips}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-red-100 border-l-4 border-red-600 p-4 rounded-lg mt-6">
+        <h3 className="font-bold text-red-900 mb-2">⚠️ Golden Rules for Overtaking:</h3>
+        <ul className="text-red-900 text-sm space-y-1">
+          <li>✓ Only overtake when it's safe and legal</li>
+          <li>✓ Check mirrors and blind spots</li>
+          <li>✓ Signal clearly before and after</li>
+          <li>✓ Never undertake (pass on left)</li>
+          <li>✓ Return to left lane immediately after</li>
+          <li>✓ When in doubt, don't overtake - it's not worth the risk</li>
+        </ul>
+      </div>
+    </div>
+  );
+
+  const renderParking = () => (
+    <div className="space-y-4">
+      <h2 className="text-3xl font-bold text-blue-900 mb-6">🅿️ Parking Rules</h2>
+      <p className="text-gray-600 mb-6">Comprehensive parking regulations for day and night across all road types.</p>
+      
+      <div className="space-y-4">
+        {parkingRules.map((rule, idx) => (
+          <div key={idx} className="bg-white border-l-4 border-blue-500 rounded-lg overflow-hidden shadow">
+            <button
+              onClick={() => toggleExpanded(`park-${idx}`)}
+              className="w-full p-4 bg-blue-50 hover:bg-blue-100 flex items-center justify-between"
+            >
+              <div className="text-left">
+                <h3 className="font-bold text-blue-700">{rule.location}</h3>
+                <p className={`text-sm mt-1 font-semibold ${rule.night.includes('✅') ? 'text-green-600' : rule.night.includes('⚠️') ? 'text-orange-600' : 'text-red-600'}`}>
+                  Night: {rule.night}
+                </p>
+              </div>
+              <ChevronDown 
+                size={20} 
+                className={`text-blue-600 transition-transform ${expandedItems[`park-${idx}`] ? 'rotate-180' : ''}`}
+              />
+            </button>
+            {expandedItems[`park-${idx}`] && (
+              <div className="p-4 bg-white space-y-3">
+                <div>
+                  <p className="text-gray-700"><strong>General Rules:</strong> {rule.rules}</p>
+                </div>
+                <div>
+                  <p className="text-gray-700"><strong>Details:</strong> {rule.details}</p>
+                </div>
+                <div className="bg-yellow-50 p-2 rounded border-l-2 border-yellow-500">
+                  <p className="text-gray-700"><strong>🌙 Night Specific:</strong> {rule.night_special}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4 mt-6">
+        <div className="bg-green-50 border-l-4 border-green-600 p-4 rounded">
+          <h3 className="font-bold text-green-700 mb-2">✓ Where You CAN Park</h3>
+          <ul className="text-sm text-green-900 space-y-1">
+            <li>• Designated parking bays</li>
+            <li>• Single yellow line (outside times)</li>
+            <li>• Blue badge spaces (if eligible)</li>
+            <li>• Permit zones (with permit)</li>
+            <li>• Pay & Display areas</li>
+          </ul>
+        </div>
+
+        <div className="bg-red-50 border-l-4 border-red-600 p-4 rounded">
+          <h3 className="font-bold text-red-700 mb-2">❌ Where You CANNOT Park</h3>
+          <ul className="text-sm text-red-900 space-y-1">
+            <li>• Double yellow lines (any time)</li>
+            <li>• Within 10m of junction</li>
+            <li>• On motorway</li>
+            <li>• Blocking driveways</li>
+            <li>• On pavement (unless marked)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderRoadStudsMarks = () => (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-bold text-blue-900 mb-6">💎 Road Studs & Reflectors</h2>
+        <p className="text-gray-600 mb-6">Colored studs guide drivers at night and in poor visibility. Each color has a specific purpose.</p>
+        
+        <div className="space-y-3">
+          {roadStudsData.map((stud, idx) => (
+            <div key={idx} className="bg-white border-l-4 border-blue-500 rounded-lg p-4 shadow">
+              <h3 className="font-bold text-lg text-gray-800 mb-2">{stud.color}</h3>
+              <div className="space-y-1 text-sm">
+                <p><strong>Location:</strong> {stud.location}</p>
+                <p><strong>Purpose:</strong> {stud.purpose}</p>
+                <p className="text-blue-700"><strong>Meaning:</strong> {stud.meaning}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-3xl font-bold text-blue-900 mb-6">🎨 Road Marking Colors</h2>
+        <p className="text-gray-600 mb-6">Painted road markings indicate parking restrictions, lane usage, and special areas.</p>
+        
+        <div className="space-y-3">
+          {roadMarkingsColor.map((mark, idx) => (
+            <div key={idx} className="bg-white border-l-4 border-green-500 rounded-lg p-4 shadow">
+              <h3 className="font-bold text-lg text-gray-800 mb-2">{mark.color}</h3>
+              <div className="space-y-2 text-sm">
+                <p><strong>Location:</strong> {mark.location}</p>
+                <p><strong>Meaning:</strong> {mark.meaning}</p>
+                <p><strong>Examples:</strong> {mark.examples}</p>
+                <p className="text-green-700"><strong>Time Rules:</strong> {mark.times}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-blue-100 border-l-4 border-blue-600 p-4 rounded-lg">
+        <h3 className="font-bold text-blue-900 mb-2">💡 Quick Reference</h3>
+        <table className="w-full text-sm">
+          <tbody>
+            <tr className="border-b">
+              <td className="py-2 font-semibold">White Studs</td>
+              <td className="py-2">= Lane dividers (same direction traffic)</td>
+            </tr>
+            <tr className="border-b">
+              <td className="py-2 font-semibold">Red Studs</td>
+              <td className="py-2">= Left edge of motorway (hard shoulder)</td>
+            </tr>
+            <tr className="border-b">
+              <td className="py-2 font-semibold">Amber Studs</td>
+              <td className="py-2">= Center line (opposite direction traffic)</td>
+            </tr>
+            <tr>
+              <td className="py-2 font-semibold">Yellow Lines</td>
+              <td className="py-2">= Parking restrictions apply</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderContraflow = () => (
+    <div className="space-y-4">
+      <h2 className="text-3xl font-bold text-blue-900 mb-6">🚧 Contraflow Traffic Rules</h2>
+      <p className="text-gray-600 mb-6">Contraflow systems are extremely dangerous. Traffic flows in opposite directions in narrow space. Maximum concentration required.</p>
+      
+      <div className="grid md:grid-cols-2 gap-4">
+        {contraflowRules.map((rule, idx) => (
+          <div key={idx} className="bg-white border-l-4 border-orange-500 rounded-lg p-4 shadow">
+            <h3 className="font-bold text-orange-700 text-lg mb-2">{rule.rule}</h3>
+            <p className="text-gray-700 text-sm mb-3">{rule.detail}</p>
+            <p className="text-red-700 font-semibold text-sm">{rule.danger}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-red-100 border-l-4 border-red-600 p-6 rounded-lg mt-6">
+        <h2 className="font-bold text-red-900 text-lg mb-3">🚨 CONTRAFLOW SURVIVAL TIPS</h2>
+        <ul className="text-red-900 space-y-2">
+          <li>✓ Reduce speed to 40-50 mph maximum</li>
+          <li>✓ Do NOT change lanes unless absolutely necessary</li>
+          <li>✓ Never cross the center barrier or line</li>
+          <li>✓ Stay in your designated lane at all times</li>
+          <li>✓ Watch other vehicles - they may panic or swerve</li>
+          <li>✓ Use dipped headlights even in daytime</li>
+          <li>✓ Maintain 3+ second following distance</li>
+          <li>✓ No distractions - phones away, focus on road</li>
+          <li>✓ If tired, EXIT and take a break</li>
+          <li>✓ Never undertake (pass on left)</li>
+        </ul>
+      </div>
+
+      <div className="bg-yellow-50 border-l-4 border-yellow-600 p-4 rounded-lg">
+        <p className="text-yellow-900"><strong>📊 Statistics:</strong> Contraflow sections have higher accident rates. Many involve fatalities. The main cause is lane changing and driver distraction. One wrong move can result in a head-on collision.</p>
+      </div>
+    </div>
+  );
+
+  const renderEmergency = () => (
+    <div className="space-y-4">
+      <h2 className="text-3xl font-bold text-blue-900 mb-6">🚨 Emergency Procedures</h2>
+      <p className="text-gray-600 mb-6">Know what to do in critical situations. Your actions can save lives.</p>
+      
+      <div className="space-y-4">
+        {emergencyRules.map((emergency, idx) => (
+          <div key={idx} className="bg-white border-l-4 border-red-600 rounded-lg overflow-hidden shadow">
+            <button
+              onClick={() => toggleExpanded(`emergency-${idx}`)}
+              className="w-full p-4 bg-red-50 hover:bg-red-100 flex items-center justify-between"
+            >
+              <h3 className="font-bold text-red-700">{emergency.situation}</h3>
+              <ChevronDown 
+                size={20} 
+                className={`text-red-600 transition-transform ${expandedItems[`emergency-${idx}`] ? 'rotate-180' : ''}`}
+              />
+            </button>
+            {expandedItems[`emergency-${idx}`] && (
+              <div className="p-4 bg-white space-y-3">
+                <div className="bg-yellow-50 p-3 rounded border-l-2 border-yellow-500">
+                  <p className="text-yellow-900 font-bold">{emergency.critical}</p>
+                </div>
+                <div>
+                  <p className="font-bold text-gray-800 mb-2">Steps to Follow:</p>
+                  <ol className="space-y-1">
+                    {emergency.steps.map((step, sidx) => (
+                      <li key={sidx} className="text-gray-700 text-sm">{step}</li>
+                    ))}
+                  </ol>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4 mt-6">
+        <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
+          <h3 className="font-bold text-blue-700 mb-2">📞 Emergency Numbers</h3>
+          <ul className="text-sm text-blue-900 space-y-1">
+            <li><strong>999</strong> - Police, Fire, Ambulance</li>
+            <li><strong>112</strong> - EU Emergency (EU roaming)</li>
+            <li><strong>101</strong> - Non-emergency Police</li>
+            <li><strong>101</strong> - Breakdown services</li>
+          </ul>
+        </div>
+
+        <div className="bg-green-50 border-l-4 border-green-600 p-4 rounded">
+          <h3 className="font-bold text-green-700 mb-2">✓ What to Do First</h3>
+          <ul className="text-sm text-green-900 space-y-1">
+            <li>1. Hazard lights ON</li>
+            <li>2. Move to safety if possible</li>
+            <li>3. Call 999 if emergency</li>
+            <li>4. Set warning triangles</li>
+            <li>5. Do NOT block traffic</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderWarnings = () => (
+    <div className="space-y-4">
+      <h2 className="text-3xl font-bold text-blue-900 mb-6">⚠️ UK Warning Signs</h2>
+      <p className="text-gray-600 mb-6">Red triangular signs indicating hazards. Always reduce speed and be alert.</p>
+      
+      <div className="grid gap-4">
+        {warningSignsData.map((sign, idx) => (
+          <div key={idx} className="bg-white border-l-4 border-red-500 rounded-lg p-4 shadow">
+            <h3 className="font-bold text-red-700">{sign.name}</h3>
+            <p className="text-gray-700 mt-2"><strong>Meaning:</strong> {sign.desc}</p>
+            <p className="text-gray-700"><strong>Action:</strong> {sign.action}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderSpeedLimits = () => (
+    <div className="space-y-4">
+      <h2 className="text-3xl font-bold text-blue-900 mb-6">🚗 Speed Limits Overview</h2>
+      <p className="text-gray-600 mb-6">National speed limits for different vehicle types and road conditions.</p>
+      
+      <div className="overflow-x-auto bg-white rounded-lg shadow">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-blue-700 text-white">
+              <th className="px-6 py-3 text-left">Vehicle Type</th>
+              <th className="px-6 py-3 text-center">Built-up</th>
+              <th className="px-6 py-3 text-center">Single</th>
+              <th className="px-6 py-3 text-center">Dual</th>
+              <th className="px-6 py-3 text-center">Motorway</th>
+            </tr>
+          </thead>
+          <tbody>
+            {speedLimitsData.map((row, idx) => (
+              <tr key={idx} className={idx % 2 === 0 ? 'bg-blue-50' : 'bg-white'}>
+                <td className="px-6 py-3 font-semibold text-gray-800">{row.vehicle}</td>
+                <td className="px-6 py-3 text-center text-red-600 font-bold">{row.builtup}</td>
+                <td className="px-6 py-3 text-center text-red-600 font-bold">{row.single}</td>
+                <td className="px-6 py-3 text-center text-red-600 font-bold">{row.dual}</td>
+                <td className="px-6 py-3 text-center text-red-600 font-bold">{row.motorway}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderTowing = () => (
+    <div className="space-y-4">
+      <h2 className="text-3xl font-bold text-blue-900 mb-6">🚙 Towing Guide</h2>
+      <p className="text-gray-600 mb-6">Speed limits and requirements when towing trailers and caravans.</p>
+      
+      <div className="space-y-3">
+        {[
+          { type: 'Small Trailer (<750kg)', speeds: '30/60/70/70', req: 'No special requirements' },
+          { type: 'Standard Caravan', speeds: '30/50/60/60', req: 'Brakes required, coupling certified' },
+          { type: 'Large Caravan', speeds: '30/50/60/60', req: 'Servo brakes, side markers' },
+        ].map((tow, idx) => (
+          <div key={idx} className="bg-white border-l-4 border-green-500 rounded p-4 shadow">
+            <h3 className="font-bold text-gray-800">{tow.type}</h3>
+            <p className="text-sm text-gray-600 mt-2">Built-up/Single/Dual/Motorway: {tow.speeds} mph</p>
+            <p className="text-sm text-green-700 font-semibold mt-1">{tow.req}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderSection = () => {
+    switch(activeSection) {
+      case 'home': return renderHome();
+      case 'warnings': return renderWarnings();
+      case 'speedlimits': return renderSpeedLimits();
+      case 'overtaking': return renderOvertaking();
+      case 'parking': return renderParking();
+      case 'roadstudmark': return renderRoadStudsMarks();
+      case 'contraflow': return renderContraflow();
+      case 'emergency': return renderEmergency();
+      case 'towing': return renderTowing();
+      default: return renderHome();
+    }
+  };
+
+  return (
+    <div className="flex h-screen bg-gray-50">
+      {/* Sidebar */}
+      <div className={`${mobileMenuOpen ? 'block' : 'hidden'} md:block fixed md:relative z-40 w-64 bg-blue-900 text-white shadow-lg h-screen overflow-y-auto`}>
+        <div className="p-6 border-b border-blue-800">
+          <h2 className="text-2xl font-bold">UK Road Rules</h2>
+          <p className="text-blue-200 text-sm mt-1">Complete Guide</p>
+        </div>
+        
+        <nav className="p-4">
+          {navigationItems.map(item => (
+            <button
+              key={item.id}
+              onClick={() => {
+                setActiveSection(item.id);
+                setMobileMenuOpen(false);
+              }}
+              className={`w-full text-left px-4 py-3 rounded-lg mb-2 transition-colors ${
+                activeSection === item.id 
+                  ? 'bg-blue-700 font-semibold' 
+                  : 'hover:bg-blue-800'
+              }`}
+            >
+              <span className="mr-2">{item.icon}</span>
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="p-4 border-t border-blue-800">
+          <div className="bg-red-900 rounded-lg p-3">
+            <p className="text-red-100 text-xs font-bold">⚠️ Safety First: Always prioritize safety over speed. Follow all rules and signs.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Bar */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow">
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 hover:bg-gray-100 rounded"
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+          
+          <div className="flex-1 mx-4">
+            <h1 className="text-xl font-bold text-blue-900 hidden md:block">
+              {navigationItems.find(item => item.id === activeSection)?.label || 'UK Road Rules'}
+            </h1>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <span className="text-sm text-gray-600 hidden sm:inline">UK Driver Guide</span>
+          </div>
+        </div>
+
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-6xl mx-auto p-6">
+            {renderSection()}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="bg-blue-900 text-blue-100 text-center py-4 text-xs border-t border-blue-800">
+          <p>UK Road Rules & Traffic Guide © 2026 | Safety is paramount | Always obey posted signs and check official sources</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default UKRoadSignsWebsite;
